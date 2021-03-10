@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Day, Mass } from '../interfaces/mass';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
+import { BookEntity } from '../book.entity';
+import { InsertResult, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BookService {
+  static MASS_LIMIT = 50;
   private masses: Mass[] = [
     {
       availableFrom: {
@@ -11,7 +15,7 @@ export class BookService {
         hour: 0,
         minute: 0,
       },
-      limit: 50,
+      limit: BookService.MASS_LIMIT,
       time: {
         dayOfWeek: DayOfWeekEnum.Friday,
         minute: 0,
@@ -24,7 +28,7 @@ export class BookService {
         hour: 7,
         minute: 0,
       },
-      limit: 50,
+      limit: BookService.MASS_LIMIT,
       time: {
         dayOfWeek: DayOfWeekEnum.Sunday,
         minute: 0,
@@ -32,6 +36,8 @@ export class BookService {
       },
     },
   ];
+
+  constructor(@InjectRepository(BookEntity) private bookRepository: Repository<BookEntity>) {}
 
   private static getNextDayOfWeek(date: Date, dayOfWeek: number) {
     const resultDate = new Date(date.getTime());
@@ -44,10 +50,17 @@ export class BookService {
     return resultDate;
   }
 
+  static DayToDate(day: Day): Date {
+    const date = BookService.getNextDayOfWeek(new Date(), day.dayOfWeek);
+    date.setHours(day.hour);
+    date.setMinutes(day.minute);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return date;
+  }
+
   private static timeInRange(time: Date, from: Day, to: Day): boolean {
-    const toDate = BookService.getNextDayOfWeek(time, to.dayOfWeek);
-    toDate.setHours(to.hour);
-    toDate.setMinutes(to.minute);
+    const toDate = BookService.DayToDate(to);
 
     if (toDate < time) {
       toDate.setDate(toDate.getDate() + 7);
@@ -65,7 +78,7 @@ export class BookService {
     return !(time.valueOf() > toDate.valueOf() || time.valueOf() < fromDate.valueOf());
   }
 
-  getDateStatus(): Mass | false {
+  getDateStatus(): Mass {
     const now = new Date();
 
     for (const mass of this.masses) {
@@ -76,6 +89,26 @@ export class BookService {
       }
     }
 
-    return false;
+    return;
+  }
+
+  async getLimit(massTime: Date): Promise<number> {
+    const masses = await this.bookRepository.find({ massTime });
+
+    let count = 0;
+
+    for (const mass of masses) {
+      count += mass.otherPeople.length + 1;
+    }
+
+    return BookService.MASS_LIMIT - count;
+  }
+
+  async book(bookEntity: BookEntity): Promise<InsertResult> {
+    return this.bookRepository.insert(bookEntity);
+  }
+
+  getBook(id: string): Promise<BookEntity> {
+    return this.bookRepository.findOne(id);
   }
 }
