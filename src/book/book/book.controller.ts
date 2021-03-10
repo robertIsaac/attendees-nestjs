@@ -9,7 +9,7 @@ export class BookController {
 
   @Get('status') status(): Status {
     const status = this.bookService.getDateStatus();
-    if (status === false) {
+    if (!status) {
       return {
         canBook: false,
         limit: 0,
@@ -24,5 +24,10 @@ export class BookController {
         `you are booking for ${DayOfWeekEnum[status.time.dayOfWeek]} Mass ` +
         `at ${status.time.hour}:${status.time.minute}`,
     };
+  }
+
+  @Get('')
+  book() {
+    this.bookService.book()
   }
 }

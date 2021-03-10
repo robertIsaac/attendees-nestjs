@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Day, Mass } from '../interfaces/mass';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
+import { BookEntity } from '../book.entity';
+import { InsertResult, Repository } from 'typeorm';
 
 @Injectable()
 export class BookService {
+  static MASS_LIMIT = 50;
   private masses: Mass[] = [
     {
       availableFrom: {
@@ -11,7 +14,7 @@ export class BookService {
         hour: 0,
         minute: 0,
       },
-      limit: 50,
+      limit: BookService.MASS_LIMIT,
       time: {
         dayOfWeek: DayOfWeekEnum.Friday,
         minute: 0,
@@ -24,7 +27,7 @@ export class BookService {
         hour: 7,
         minute: 0,
       },
-      limit: 50,
+      limit: BookService.MASS_LIMIT,
       time: {
         dayOfWeek: DayOfWeekEnum.Sunday,
         minute: 0,
@@ -32,6 +35,8 @@ export class BookService {
       },
     },
   ];
+
+  constructor(private bookRepository: Repository<BookEntity>) {}
 
   private static getNextDayOfWeek(date: Date, dayOfWeek: number) {
     const resultDate = new Date(date.getTime());
@@ -65,7 +70,7 @@ export class BookService {
     return !(time.valueOf() > toDate.valueOf() || time.valueOf() < fromDate.valueOf());
   }
 
-  getDateStatus(): Mass | false {
+  getDateStatus(): Mass {
     const now = new Date();
 
     for (const mass of this.masses) {
@@ -76,6 +81,34 @@ export class BookService {
       }
     }
 
-    return false;
+    return;
+  }
+
+  async getLimit(massTime: Date): Promise<number> {
+    const masses = await this.bookRepository.find({ massTime });
+
+    let count = 0;
+
+    for (const mass of masses) {
+      count += mass.otherPeople.length + 1;
+    }
+
+    return BookService.MASS_LIMIT - count;
+  }
+
+  async book(bookEntity: BookEntity): Promise<InsertResult> {
+    const status = this.getDateStatus();
+
+    if (!status) {
+      return;
+    }
+
+    const limit = await this.getLimit(bookEntity.massTime);
+
+    if (limit <= bookEntity.otherPeople.length) {
+      return;
+    }
+
+    return this.bookRepository.insert(bookEntity);
   }
 }
