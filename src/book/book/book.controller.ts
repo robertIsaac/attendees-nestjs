@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Status } from '../interfaces/status';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
@@ -59,5 +59,16 @@ export class BookController {
       return this.bookService.getBook(result.identifiers[0].id);
     }
     return false;
+  }
+
+  @Get('dates')
+  async dates() {
+    const dates = (await this.bookService.getDates()).map((book) => book.massTime.toISOString());
+    return [...new Set(dates)];
+  }
+
+  @Get('attendees')
+  async attendees(@Query('massTime') massTime: string) {
+    return this.bookService.attendees(massTime);
   }
 }

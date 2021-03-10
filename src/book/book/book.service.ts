@@ -111,4 +111,15 @@ export class BookService {
   getBook(id: string): Promise<BookEntity> {
     return this.bookRepository.findOne(id);
   }
+
+  getDates() {
+    return this.bookRepository.find({
+      select: ['massTime'],
+      order: { massTime: 'ASC' },
+    });
+  }
+
+  attendees(massTime: string) {
+    return this.bookRepository.find({ massTime: new Date(massTime) });
+  }
 }
