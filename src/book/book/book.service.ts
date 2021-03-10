@@ -3,6 +3,7 @@ import { Day, Mass } from '../interfaces/mass';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
 import { BookEntity } from '../book.entity';
 import { InsertResult, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BookService {
@@ -36,7 +37,7 @@ export class BookService {
     },
   ];
 
-  constructor(private bookRepository: Repository<BookEntity>) {}
+  constructor(@InjectRepository(BookEntity) private bookRepository: Repository<BookEntity>) {}
 
   private static getNextDayOfWeek(date: Date, dayOfWeek: number) {
     const resultDate = new Date(date.getTime());
@@ -49,10 +50,15 @@ export class BookService {
     return resultDate;
   }
 
+  static DayToDate(day: Day): Date {
+    const date = BookService.getNextDayOfWeek(new Date(), day.dayOfWeek);
+    date.setHours(day.hour);
+    date.setMinutes(day.minute);
+    return date;
+  }
+
   private static timeInRange(time: Date, from: Day, to: Day): boolean {
-    const toDate = BookService.getNextDayOfWeek(time, to.dayOfWeek);
-    toDate.setHours(to.hour);
-    toDate.setMinutes(to.minute);
+    const toDate = BookService.DayToDate(to);
 
     if (toDate < time) {
       toDate.setDate(toDate.getDate() + 7);
@@ -97,18 +103,10 @@ export class BookService {
   }
 
   async book(bookEntity: BookEntity): Promise<InsertResult> {
-    const status = this.getDateStatus();
-
-    if (!status) {
-      return;
-    }
-
-    const limit = await this.getLimit(bookEntity.massTime);
-
-    if (limit <= bookEntity.otherPeople.length) {
-      return;
-    }
-
     return this.bookRepository.insert(bookEntity);
+  }
+
+  getBook(id: string): Promise<BookEntity> {
+    return this.bookRepository.findOne(id);
   }
 }
