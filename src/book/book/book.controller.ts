@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Status } from '../interfaces/status';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
@@ -39,8 +39,8 @@ export class BookController {
     };
   }
 
-  @Get('')
-  async book(bookEntity: BookEntity) {
+  @Post('')
+  async book(@Body() bookEntity: BookEntity) {
     const status = await this.status();
 
     if (!status.canBook) {
@@ -50,6 +50,9 @@ export class BookController {
     if (bookEntity.otherPeople.length > status.limit) {
       return false;
     }
+
+    bookEntity.massTime = BookService.DayToDate(this.bookService.getDateStatus().time);
+    bookEntity.createAt = new Date();
 
     const result = await this.bookService.book(bookEntity);
     if (result) {

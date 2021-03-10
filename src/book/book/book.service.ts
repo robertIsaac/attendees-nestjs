@@ -54,6 +54,8 @@ export class BookService {
     const date = BookService.getNextDayOfWeek(new Date(), day.dayOfWeek);
     date.setHours(day.hour);
     date.setMinutes(day.minute);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
     return date;
   }
 
