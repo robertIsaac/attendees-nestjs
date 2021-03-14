@@ -22,7 +22,7 @@ export class BookController {
     const massDate = BookService.DayToDate(status.time);
     const limit = await this.bookService.getLimit(massDate);
 
-    if (!limit) {
+    if (limit <= 0) {
       return {
         canBook: false,
         limit: 0,
@@ -47,7 +47,7 @@ export class BookController {
       return false;
     }
 
-    if (bookEntity.otherPeople.length > status.limit) {
+    if (bookEntity.otherPeople.length >= status.limit) {
       return false;
     }
 
