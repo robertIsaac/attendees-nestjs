@@ -19,8 +19,8 @@ export class BookController {
       };
     }
 
-    const massDate = BookService.DayToDate(status.time);
-    const limit = await this.bookService.getLimit(massDate);
+    const massTime = BookService.DayToDate(status.time);
+    const limit = await this.bookService.getLimit(massTime);
 
     if (limit <= 0) {
       return {
@@ -36,6 +36,7 @@ export class BookController {
       message:
         `you are booking for ${DayOfWeekEnum[status.time.dayOfWeek]} Mass ` +
         `at ${status.time.hour}:${status.time.minute}`,
+      massTime,
     };
   }
 
@@ -51,7 +52,7 @@ export class BookController {
       throw new HttpException(`maximum allowed attendances are ${status.limit}`, HttpStatus.BAD_REQUEST);
     }
 
-    bookEntity.massTime = BookService.DayToDate(this.bookService.getDateStatus().time);
+    bookEntity.massTime = status.massTime;
     bookEntity.createAt = new Date();
 
     if (!(await this.bookService.hasDuplicateName(bookEntity.massTime, bookEntity))) {
