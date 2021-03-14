@@ -7,17 +7,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class BookService {
-  static MASS_LIMIT = 50;
+  static MASS_LIMIT = 60;
   private masses: Mass[] = [
     {
       availableFrom: {
-        dayOfWeek: DayOfWeekEnum.Wednesday,
+        dayOfWeek: DayOfWeekEnum.Sunday,
         hour: 0,
         minute: 0,
       },
       limit: BookService.MASS_LIMIT,
       time: {
-        dayOfWeek: DayOfWeekEnum.Friday,
+        dayOfWeek: DayOfWeekEnum.Tuesday,
         minute: 0,
         hour: 10,
       },
