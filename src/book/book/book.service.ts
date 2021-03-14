@@ -119,7 +119,35 @@ export class BookService {
     });
   }
 
-  attendees(massTime: string) {
+  attendees(massTime: string | Date) {
     return this.bookRepository.find({ massTime: new Date(massTime) });
+  }
+
+  async hasDuplicateName(massTime: string | Date, book: BookEntity) {
+    const attendees = await this.attendees(massTime);
+    const names = [book.name, ...book.otherPeople];
+    const uniqueNames = [...new Set(names)];
+
+    if (uniqueNames.length !== names.length) {
+      return false;
+    }
+
+    for (const attend of attendees) {
+      if (attend.phone === book.phone) {
+        return false;
+      }
+
+      if (names.includes(attend.name)) {
+        return false;
+      }
+
+      for (const other of attend.otherPeople) {
+        if (names.includes(other)) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
