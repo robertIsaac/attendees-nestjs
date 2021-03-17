@@ -17,7 +17,7 @@ export class BookService {
       },
       limit: BookService.MASS_LIMIT,
       time: {
-        dayOfWeek: DayOfWeekEnum.Wednesday,
+        dayOfWeek: DayOfWeekEnum.Friday,
         minute: 0,
         hour: 10,
       },
