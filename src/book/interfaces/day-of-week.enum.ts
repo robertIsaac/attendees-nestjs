@@ -7,3 +7,13 @@ export enum DayOfWeekEnum {
   Friday,
   Saturday,
 }
+
+export enum ArabicDayOfWeekEnum {
+  'الاحد',
+  'الاثنين',
+  'الثلاثاء',
+  'الاربعاء',
+  'الخميس',
+  'الجمعة',
+  'السبت',
+}

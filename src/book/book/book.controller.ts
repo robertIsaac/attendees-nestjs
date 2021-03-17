@@ -1,16 +1,16 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
 import { BookService } from './book.service';
 import { Status } from '../interfaces/status';
-import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
+import { ArabicDayOfWeekEnum, DayOfWeekEnum } from '../interfaces/day-of-week.enum';
 import { BookEntity } from '../book.entity';
-import { I18n, I18nContext, I18nService } from 'nestjs-i18n';
+import { I18n, I18nContext, I18nLang } from 'nestjs-i18n';
 
 @Controller('book')
 export class BookController {
   constructor(private bookService: BookService) {}
 
   @Get('status')
-  async status(@I18n() i18n: I18nContext): Promise<Status> {
+  async status(@I18n() i18n: I18nContext, @I18nLang() lang: string): Promise<Status> {
     const status = this.bookService.getDateStatus();
     if (!status) {
       const message = await i18n.translate('message.no available masses');
@@ -33,7 +33,12 @@ export class BookController {
       };
     }
 
-    const message = await i18n.translate('message.booking for', { args: status.time });
+    let dayOfWeek = DayOfWeekEnum[status.time.dayOfWeek];
+    if (lang === 'ar') {
+      dayOfWeek = ArabicDayOfWeekEnum[status.time.dayOfWeek];
+    }
+
+    const message = await i18n.translate('message.booking for', { args: { ...status.time, dayOfWeek } });
 
     return {
       canBook: true,
@@ -44,8 +49,8 @@ export class BookController {
   }
 
   @Post('')
-  async book(@Body() bookEntity: BookEntity, @I18n() i18n: I18nContext) {
-    const status = await this.status(i18n);
+  async book(@Body() bookEntity: BookEntity, @I18n() i18n: I18nContext, @I18nLang() lang: string) {
+    const status = await this.status(i18n, lang);
 
     if (!status.canBook) {
       throw new HttpException('there is no available mass to book', HttpStatus.BAD_REQUEST);
