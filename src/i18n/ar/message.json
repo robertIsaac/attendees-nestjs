@@ -1,0 +1,7 @@
+{
+  "no available masses": "لا يوجد قداسات متاحة الان، التسجيل لقداس اليوم يبدا الاربعاء الساعة 9 صباحا، وقداس يوم الاحد يبدا الجمعة 9 صباحا",
+  "mass limit reached": "لا يوجد اماكن للحجز",
+  "booking for": "انت تحجز لقداس يوم {dayOfWeek} الساعة {hour}:{minute}",
+  "maximum allowed attendances": "العدد المتاح للحجز {limit} فقط",
+  "name already registered": "يوجد اسم سجل بالفعل"
+}

@@ -3,19 +3,21 @@ import { BookService } from './book.service';
 import { Status } from '../interfaces/status';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
 import { BookEntity } from '../book.entity';
+import { I18n, I18nContext, I18nService } from 'nestjs-i18n';
 
 @Controller('book')
 export class BookController {
   constructor(private bookService: BookService) {}
 
   @Get('status')
-  async status(): Promise<Status> {
+  async status(@I18n() i18n: I18nContext): Promise<Status> {
     const status = this.bookService.getDateStatus();
     if (!status) {
+      const message = await i18n.translate('message.no available masses');
       return {
         canBook: false,
         limit: 0,
-        message: `there is no available masses now, Friday mass booking opens Wednesday 9 AM and Sunday's mass opens Friday 9 AM`,
+        message,
       };
     }
 
@@ -23,40 +25,43 @@ export class BookController {
     const limit = await this.bookService.getLimit(massTime);
 
     if (limit <= 0) {
+      const message = await i18n.translate('message.mass limit reached');
       return {
         canBook: false,
         limit: 0,
-        message: `mass limit reached`,
+        message,
       };
     }
+
+    const message = await i18n.translate('message.booking for', { args: status.time });
 
     return {
       canBook: true,
       limit,
-      message:
-        `you are booking for ${DayOfWeekEnum[status.time.dayOfWeek]} Mass ` +
-        `at ${status.time.hour}:${status.time.minute}`,
+      message,
       massTime,
     };
   }
 
   @Post('')
-  async book(@Body() bookEntity: BookEntity) {
-    const status = await this.status();
+  async book(@Body() bookEntity: BookEntity, @I18n() i18n: I18nContext) {
+    const status = await this.status(i18n);
 
     if (!status.canBook) {
       throw new HttpException('there is no available mass to book', HttpStatus.BAD_REQUEST);
     }
 
     if (bookEntity.otherPeople.length >= status.limit) {
-      throw new HttpException(`maximum allowed attendances are ${status.limit}`, HttpStatus.BAD_REQUEST);
+      const message = await i18n.translate('message.maximum allowed attendances', { args: { limit: status.limit } });
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
     }
 
     bookEntity.massTime = status.massTime;
     bookEntity.createAt = new Date();
 
     if (!(await this.bookService.hasDuplicateName(bookEntity.massTime, bookEntity))) {
-      throw new HttpException('a name of the attendance is already registered', HttpStatus.BAD_REQUEST);
+      const message = await i18n.translate('message.name already registered');
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
     }
 
     const result = await this.bookService.book(bookEntity);

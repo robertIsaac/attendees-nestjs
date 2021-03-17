@@ -4,6 +4,8 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BookModule } from './book/book.module';
+import { HeaderResolver, I18nJsonParser, I18nModule } from 'nestjs-i18n';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -44,6 +46,15 @@ import { BookModule } from './book/book.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      parser: I18nJsonParser,
+      parserOptions: {
+        path: path.join(__dirname, '/i18n/'),
+      },
+      resolvers: [new HeaderResolver(['x-lang'])],
+    }),
+
     AuthModule,
     UsersModule,
     BookModule,
