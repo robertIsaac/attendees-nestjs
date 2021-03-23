@@ -11,7 +11,7 @@ export class BookService {
   private masses: Mass[] = [
     {
       availableFrom: {
-        dayOfWeek: DayOfWeekEnum.Sunday,
+        dayOfWeek: DayOfWeekEnum.Wednesday,
         hour: 0,
         minute: 0,
       },
@@ -115,7 +115,7 @@ export class BookService {
   getDates() {
     return this.bookRepository.find({
       select: ['massTime'],
-      order: { massTime: 'ASC' },
+      order: { massTime: 'DESC' },
     });
   }
 
