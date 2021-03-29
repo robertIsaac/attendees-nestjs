@@ -3,5 +3,6 @@
   "mass limit reached": "mass limit reached",
   "booking for": "you are booking for {dayOfWeek} Mass at {hour}:{minute}",
   "maximum allowed attendances": "maximum allowed attendances are {limit}",
-  "name already registered": "a name of the attendance is already registered"
+  "name already registered": "a name of the attendance is already registered",
+  "an error occurred": "an error occurred"
 }

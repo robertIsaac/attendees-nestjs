@@ -3,5 +3,6 @@
   "mass limit reached": "لا يوجد اماكن للحجز",
   "booking for": "انت تحجز لقداس يوم {dayOfWeek} الساعة {hour}:{minute}",
   "maximum allowed attendances": "العدد المتاح للحجز {limit} فقط",
-  "name already registered": "يوجد اسم سجل بالفعل"
+  "name already registered": "يوجد اسم سجل بالفعل",
+  "an error occurred": "حصل خطا"
 }

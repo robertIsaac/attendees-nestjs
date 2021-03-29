@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Day, Mass } from '../interfaces/mass';
 import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
 import { BookEntity } from '../book.entity';
-import { InsertResult, Repository } from 'typeorm';
+import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -112,6 +112,25 @@ export class BookService {
     return this.bookRepository.findOne(id);
   }
 
+  deleteBook(id: string): Promise<DeleteResult> {
+    return this.bookRepository.delete(id);
+  }
+
+  async updateBook(bookEntity: Partial<BookEntity>): Promise<DeleteResult | false> {
+    const attendees = await this.bookRepository.find({
+      where: {
+        massTime: new Date(bookEntity.massTime),
+        id: { $not: { $eq: bookEntity.id } },
+      },
+    });
+
+    if (BookService.attendeesHasDuplicate(attendees, bookEntity)) {
+      return false;
+    } else {
+      return await this.bookRepository.update(bookEntity.id, bookEntity);
+    }
+  }
+
   getDates() {
     return this.bookRepository.find({
       select: ['massTime'],
@@ -119,35 +138,39 @@ export class BookService {
     });
   }
 
-  attendees(massTime: string | Date) {
+  attendees(massTime: string | Date): Promise<BookEntity[]> {
     return this.bookRepository.find({ massTime: new Date(massTime) });
   }
 
-  async hasDuplicateName(massTime: string | Date, book: BookEntity) {
+  async hasDuplicateName(massTime: string | Date, book: BookEntity): Promise<boolean> {
     const attendees = await this.attendees(massTime);
+    return BookService.attendeesHasDuplicate(attendees, book);
+  }
+
+  private static attendeesHasDuplicate(attendees: BookEntity[], book: Partial<BookEntity>): boolean {
     const names = [book.name, ...book.otherPeople];
     const uniqueNames = [...new Set(names)];
 
     if (uniqueNames.length !== names.length) {
-      return false;
+      return true;
     }
 
     for (const attend of attendees) {
       if (attend.phone === book.phone) {
-        return false;
+        return true;
       }
 
       if (names.includes(attend.name)) {
-        return false;
+        return true;
       }
 
       for (const other of attend.otherPeople) {
         if (names.includes(other)) {
-          return false;
+          return true;
         }
       }
     }
 
-    return true;
+    return false;
   }
 }

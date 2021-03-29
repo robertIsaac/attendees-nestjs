@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { BookService } from './book.service';
 import { Status } from '../interfaces/status';
 import { ArabicDayOfWeekEnum, DayOfWeekEnum } from '../interfaces/day-of-week.enum';
@@ -87,5 +99,52 @@ export class BookController {
   @Get('attendees')
   async attendees(@Query('massTime') massTime: string) {
     return this.bookService.attendees(massTime);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string, @I18n() i18n: I18nContext): Promise<BookEntity> {
+    const book = await this.bookService.getBook(id);
+    if (!book) {
+      const message = await i18n.translate(`book not found`);
+      throw new HttpException(message, HttpStatus.NOT_FOUND);
+    }
+    return book;
+  }
+
+  @Put(':id')
+  @HttpCode(204)
+  async update(@Param('id') id: string, @Body() bookEntity: BookEntity, @I18n() i18n: I18nContext): Promise<void> {
+    const book = await this.bookService.getBook(id);
+    if (!book) {
+      const message = await i18n.translate(`book not found`);
+      throw new HttpException(message, HttpStatus.NOT_FOUND);
+    }
+    const updatedEntity: BookEntity = {
+      ...book,
+      id,
+      phone: bookEntity.phone,
+      name: bookEntity.name,
+      otherPeople: bookEntity.otherPeople,
+    };
+    const response = await this.bookService.updateBook(updatedEntity);
+
+    if (response === false) {
+      const message = await i18n.translate(`an error occurred`);
+      throw new HttpException(message, HttpStatus.BAD_REQUEST);
+    }
+
+    return;
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async remove(@Param('id') id: string, @I18n() i18n: I18nContext): Promise<void> {
+    const book = await this.bookService.getBook(id);
+    if (!book) {
+      const message = await i18n.translate(`book not found`);
+      throw new HttpException(message, HttpStatus.NOT_FOUND);
+    }
+    await this.bookService.deleteBook(id);
+    return;
   }
 }
