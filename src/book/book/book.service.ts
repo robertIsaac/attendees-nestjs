@@ -144,7 +144,7 @@ export class BookService {
 
   async hasDuplicateName(massTime: string | Date, book: BookEntity): Promise<boolean> {
     const attendees = await this.attendees(massTime);
-    return BookService.attendeesHasDuplicate(attendees, book);
+    return !BookService.attendeesHasDuplicate(attendees, book);
   }
 
   private static attendeesHasDuplicate(attendees: BookEntity[], book: Partial<BookEntity>): boolean {
