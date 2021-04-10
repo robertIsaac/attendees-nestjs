@@ -92,13 +92,18 @@ export class BookController {
 
   @Get('dates')
   async dates() {
-    const dates = (await this.bookService.getDates()).map((book) => book.massTime.toISOString());
+    const dates = (await this.bookService.getDates()).map((book) => new Date(book.massTime).toISOString());
     return [...new Set(dates)];
   }
 
   @Get('attendees')
   async attendees(@Query('massTime') massTime: string) {
     return this.bookService.attendees(massTime);
+  }
+
+  @Get('attendanceByPhone/:phone')
+  async attendanceByPhone(@Param('phone') phone: string) {
+    return this.bookService.getAttendanceByPhone(phone);
   }
 
   @Get(':id')

@@ -147,6 +147,13 @@ export class BookService {
     return !BookService.attendeesHasDuplicate(attendees, book);
   }
 
+  async getAttendanceByPhone(phone: string): Promise<BookEntity> {
+    return this.bookRepository.findOne({
+      where: { phone },
+      order: { massTime: 'DESC' },
+    });
+  }
+
   private static attendeesHasDuplicate(attendees: BookEntity[], book: Partial<BookEntity>): boolean {
     const names = [book.name, ...book.otherPeople];
     const uniqueNames = [...new Set(names)];
