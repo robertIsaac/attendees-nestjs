@@ -119,7 +119,7 @@ export class BookService {
   async updateBook(bookEntity: Partial<BookEntity>): Promise<DeleteResult | false> {
     const attendees = await this.bookRepository.find({
       where: {
-        massTime: new Date(bookEntity.massTime),
+        massTime: new Date(bookEntity.massTime).toISOString(),
         id: { $not: { $eq: bookEntity.id } },
       },
     });
