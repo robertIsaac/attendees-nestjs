@@ -3,6 +3,7 @@ import { BookEntity } from '../book.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Mass } from '../../mass/entities/mass.entity';
+import { ObjectID } from 'mongodb';
 
 @Injectable()
 export class BookService {
@@ -35,8 +36,8 @@ export class BookService {
   async updateBook(bookEntity: Partial<BookEntity>): Promise<DeleteResult | false> {
     const attendees = await this.bookRepository.find({
       where: {
-        massId: new Date(bookEntity.massId).toISOString(),
-        id: { $not: { $eq: bookEntity.id } },
+        massId: bookEntity.massId,
+        _id: { $not: { $eq: ObjectID(bookEntity.id) } },
       },
     });
 

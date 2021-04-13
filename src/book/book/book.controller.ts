@@ -9,7 +9,6 @@ import {
   Param,
   Post,
   Put,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { BookService } from './book.service';
@@ -92,9 +91,9 @@ export class BookController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('attendees')
-  async attendees(@Query('massTime') massTime: string) {
-    return this.bookService.attendees(massTime);
+  @Get('attendees/:massId')
+  async attendees(@Param('massId') massId: string) {
+    return this.bookService.attendees(massId);
   }
 
   @UseGuards(AuthGuard('jwt'))
