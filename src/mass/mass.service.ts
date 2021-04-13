@@ -28,4 +28,15 @@ export class MassService {
   remove(id: string) {
     return this.massRepository.delete(id);
   }
+
+  findAvailable() {
+    const now = new Date();
+    const afterThreeHours = new Date(now.valueOf() + 3 * 60 * 60 * 1000);
+    return this.massRepository.find({
+      where: {
+        time: { $gt: afterThreeHours.toISOString() },
+        availableFrom: { $lt: new Date().toISOString() },
+      },
+    });
+  }
 }

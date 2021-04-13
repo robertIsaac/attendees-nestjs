@@ -7,6 +7,7 @@ import { Mass } from './entities/mass.entity';
 @Module({
   controllers: [MassController],
   providers: [MassService],
+  exports: [MassService],
   imports: [TypeOrmModule.forFeature([Mass])],
 })
 export class MassModule {}
