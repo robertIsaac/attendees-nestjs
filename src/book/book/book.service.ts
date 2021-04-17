@@ -57,8 +57,11 @@ export class BookService {
     return !BookService.attendeesHasDuplicate(attendees, book);
   }
 
-  async getAttendanceByPhone(phone: string): Promise<BookEntity> {
-    return this.bookRepository.findOne({ phone });
+  async getAttendanceByPhone(phone: string): Promise<BookEntity | undefined> {
+    return this.bookRepository.findOne({
+      where: { phone },
+      order: { createAt: 'DESC' },
+    });
   }
 
   private static attendeesHasDuplicate(attendees: BookEntity[], book: Partial<BookEntity>): boolean {
