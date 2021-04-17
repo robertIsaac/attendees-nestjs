@@ -22,7 +22,7 @@ export class MassService {
   }
 
   update(id: string, updateMassDto: UpdateMassDto) {
-    return this.massRepository.update(updateMassDto.id, updateMassDto);
+    return this.massRepository.update(id, updateMassDto);
   }
 
   remove(id: string) {

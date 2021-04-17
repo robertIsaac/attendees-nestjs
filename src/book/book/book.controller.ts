@@ -27,7 +27,6 @@ export class BookController {
     @I18n() i18n: I18nContext,
   ): Promise<{ canBook: true; masses: Mass[] } | { canBook: false; message: string }> {
     const availableMasses = await this.massService.findAvailable();
-    console.log(availableMasses);
     if (availableMasses.length === 0) {
       const message = await i18n.translate('message.no available masses');
       return {
