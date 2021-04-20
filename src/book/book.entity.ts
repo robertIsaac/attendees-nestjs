@@ -15,7 +15,7 @@ export class BookEntity {
   createAt: Date;
 
   @Column({ nullable: false })
-  massTime: Date;
+  massId: string;
 
   @Column()
   otherPeople: string[];

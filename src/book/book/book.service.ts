@@ -1,107 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Day, Mass } from '../interfaces/mass';
-import { DayOfWeekEnum } from '../interfaces/day-of-week.enum';
 import { BookEntity } from '../book.entity';
 import { DeleteResult, InsertResult, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Mass } from '../../mass/entities/mass.entity';
+import { ObjectID } from 'mongodb';
 
 @Injectable()
 export class BookService {
-  static MASS_LIMIT = 60;
-  private masses: Mass[] = [
-    {
-      availableFrom: {
-        dayOfWeek: DayOfWeekEnum.Wednesday,
-        hour: 0,
-        minute: 0,
-      },
-      limit: BookService.MASS_LIMIT,
-      time: {
-        dayOfWeek: DayOfWeekEnum.Friday,
-        minute: 0,
-        hour: 10,
-      },
-    },
-    {
-      availableFrom: {
-        dayOfWeek: DayOfWeekEnum.Friday,
-        hour: 7,
-        minute: 0,
-      },
-      limit: BookService.MASS_LIMIT,
-      time: {
-        dayOfWeek: DayOfWeekEnum.Sunday,
-        minute: 0,
-        hour: 19,
-      },
-    },
-  ];
-
   constructor(@InjectRepository(BookEntity) private bookRepository: Repository<BookEntity>) {}
 
-  private static getNextDayOfWeek(date: Date, dayOfWeek: number) {
-    const resultDate = new Date(date.getTime());
-
-    if (resultDate.getDay() === dayOfWeek) {
-      return resultDate;
-    }
-
-    resultDate.setDate(date.getDate() + ((7 + dayOfWeek - date.getDay()) % 7));
-    return resultDate;
-  }
-
-  static DayToDate(day: Day): Date {
-    const date = BookService.getNextDayOfWeek(new Date(), day.dayOfWeek);
-    date.setHours(day.hour);
-    date.setMinutes(day.minute);
-    date.setSeconds(0);
-    date.setMilliseconds(0);
-    return date;
-  }
-
-  private static timeInRange(time: Date, from: Day, to: Day): boolean {
-    const toDate = BookService.DayToDate(to);
-
-    if (toDate < time) {
-      toDate.setDate(toDate.getDate() + 7);
-    }
-
-    const fromDate = new Date(toDate.getTime());
-    fromDate.setDate(fromDate.getDate() + from.dayOfWeek - to.dayOfWeek);
-    fromDate.setHours(fromDate.getHours() + from.hour - to.hour);
-    fromDate.setMinutes(fromDate.getMinutes() + from.minute - to.minute);
-
-    if (toDate < fromDate) {
-      fromDate.setDate(fromDate.getDate() - 7);
-    }
-
-    return !(time.valueOf() > toDate.valueOf() || time.valueOf() < fromDate.valueOf());
-  }
-
-  getDateStatus(): Mass {
-    const now = new Date();
-
-    for (const mass of this.masses) {
-      const to = { ...mass.time, hour: mass.time.hour - 3 };
-
-      if (BookService.timeInRange(now, mass.availableFrom, to)) {
-        return mass;
-      }
-    }
-
-    return;
-  }
-
-  async getLimit(massTime: Date): Promise<number> {
-    const masses = await this.bookRepository.find({ massTime });
+  async getLimit(mass: Mass): Promise<number> {
+    const bookEntities = await this.bookRepository.find({ massId: mass.id });
 
     let count = 0;
 
-    for (const mass of masses) {
-      count += mass.otherPeople.length + 1;
+    for (const bookEntity of bookEntities) {
+      count += bookEntity.otherPeople.length + 1;
     }
 
-    return BookService.MASS_LIMIT - count;
+    return mass.limit - count;
   }
 
   async book(bookEntity: BookEntity): Promise<InsertResult> {
@@ -119,8 +36,8 @@ export class BookService {
   async updateBook(bookEntity: Partial<BookEntity>): Promise<DeleteResult | false> {
     const attendees = await this.bookRepository.find({
       where: {
-        massTime: new Date(bookEntity.massTime).toISOString(),
-        id: { $not: { $eq: bookEntity.id } },
+        massId: bookEntity.massId,
+        _id: { $not: { $eq: ObjectID(bookEntity.id) } },
       },
     });
 
@@ -131,26 +48,19 @@ export class BookService {
     }
   }
 
-  getDates() {
-    return this.bookRepository.find({
-      select: ['massTime'],
-      order: { massTime: 'DESC' },
-    });
+  attendees(massId: string): Promise<BookEntity[]> {
+    return this.bookRepository.find({ massId });
   }
 
-  attendees(massTime: string | Date): Promise<BookEntity[]> {
-    return this.bookRepository.find({ massTime: new Date(massTime) });
-  }
-
-  async hasDuplicateName(massTime: string | Date, book: BookEntity): Promise<boolean> {
-    const attendees = await this.attendees(massTime);
+  async hasDuplicateName(massId: string, book: BookEntity): Promise<boolean> {
+    const attendees = await this.attendees(massId);
     return !BookService.attendeesHasDuplicate(attendees, book);
   }
 
-  async getAttendanceByPhone(phone: string): Promise<BookEntity> {
+  async getAttendanceByPhone(phone: string): Promise<BookEntity | undefined> {
     return this.bookRepository.findOne({
       where: { phone },
-      order: { massTime: 'DESC' },
+      order: { createAt: 'DESC' },
     });
   }
 

@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BookModule } from './book/book.module';
 import { HeaderResolver, I18nJsonParser, I18nModule } from 'nestjs-i18n';
+import { MassModule } from './mass/mass.module';
 import * as path from 'path';
 
 @Module({
@@ -58,6 +59,7 @@ import * as path from 'path';
     AuthModule,
     UsersModule,
     BookModule,
+    MassModule,
   ],
   controllers: [],
   providers: [],
