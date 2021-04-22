@@ -38,7 +38,7 @@ export class BookController {
     const massesWithLimit: Mass[] = [];
     for (const mass of availableMasses) {
       const limit = await this.bookService.getLimit(mass);
-      if (limit) {
+      if (limit > 0) {
         mass.limit = limit;
         massesWithLimit.push(mass);
       }

@@ -10,7 +10,7 @@ export class BookService {
   constructor(@InjectRepository(BookEntity) private bookRepository: Repository<BookEntity>) {}
 
   async getLimit(mass: Mass): Promise<number> {
-    const bookEntities = await this.bookRepository.find({ massId: mass.id });
+    const bookEntities = await this.bookRepository.find({ massId: mass.id.toString() });
 
     let count = 0;
 
