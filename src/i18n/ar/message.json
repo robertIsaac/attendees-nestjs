@@ -1,8 +1,8 @@
 {
-  "no available masses": "لا يوجد قداسات متاحة الان، التسجيل لقداس اليوم يبدا الاربعاء الساعة 9 صباحا، وقداس يوم الاحد يبدا الجمعة 9 صباحا",
+  "no available masses": "لا يوجد قداسات متاحة الان",
   "mass limit reached": "لا يوجد اماكن للحجز",
   "booking for": "انت تحجز لقداس يوم {dayOfWeek} الساعة {hour}:{minute}",
   "maximum allowed attendances": "العدد المتاح للحجز {limit} فقط",
-  "name already registered": "يوجد اسم سجل بالفعل",
+  "name already registered": "احد الاسماء او رقم التليفون مسجل بالفعل",
   "an error occurred": "حصل خطا"
 }
