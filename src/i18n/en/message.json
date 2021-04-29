@@ -1,8 +1,8 @@
 {
-  "no available masses": "there is no available masses now, Friday mass booking opens Wednesday 9 AM and Sunday's mass opens Friday 9 AM",
+  "no available masses": "there is no available masses now",
   "mass limit reached": "mass limit reached",
   "booking for": "you are booking for {dayOfWeek} Mass at {hour}:{minute}",
   "maximum allowed attendances": "maximum allowed attendances are {limit}",
-  "name already registered": "a name of the attendance is already registered",
+  "name already registered": "one of the names or the phone number is already registered",
   "an error occurred": "an error occurred"
 }
