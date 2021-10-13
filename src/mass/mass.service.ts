@@ -14,7 +14,10 @@ export class MassService {
   }
 
   findAll() {
-    return this.massRepository.find();
+    return this.massRepository.find({
+      order: { time: 'DESC' },
+      where: { availableFrom: { $lt: new Date().toISOString() } },
+    });
   }
 
   findOne(id: string) {
